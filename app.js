@@ -1,6 +1,7 @@
 'use strict';
 
 const Sequelize = require('sequelize');
+const routes = require('./routes');
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
@@ -35,6 +36,13 @@ app.get('/', (req, res) => {
     message: 'Welcome to the REST API project!',
   });
 });
+
+// Add routes.
+/* The router is imported from the routes module into the app.js file and added to the main application 
+using the Express Application use() method, This means that the complete path for the GET and POST 
+user routes is /api/users: https://teamtreehouse.com/library/rest-api-validation-with-express-2/the-importance-of-data-validation/review-the-routes */
+app.use('/api', routes);
+
 
 // send 404 if no other route matched
 app.use((req, res) => {
