@@ -2,12 +2,14 @@
 
 const Sequelize = require('sequelize');
 const routes = require('./routes');
+require('log-timestamp');
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: 'fsjstd-restapi.db'
 });
 
+//Test the database connection
 (async () => {
   try {
     await sequelize.authenticate();
@@ -27,6 +29,9 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 // create the Express app
 const app = express();
 
+//Gives express the ability to parse JSON and read req.body
+app.use(express.json());
+
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
@@ -37,7 +42,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Add routes.
+// Re-direct routes app to routes module.
 /* The router is imported from the routes module into the app.js file and added to the main application 
 using the Express Application use() method, This means that the complete path for the GET and POST 
 user routes is /api/users: https://teamtreehouse.com/library/rest-api-validation-with-express-2/the-importance-of-data-validation/review-the-routes */
