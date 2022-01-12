@@ -106,14 +106,25 @@ router.put('/courses/:id', asyncHandler(async(req, res) => {
         res.status(404).json({message: "Course not found"})
     }
     } catch (error) {
-        if (error.name === "SequelizeValidationError") {
+        if (error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError') {
+            //the .build method will build a new model instance in case there is a SequelizeValidationError or SequelizeUniqueConstraintError
+            //contrast this with the create method, which will build and save the instance.
             course = await Course.build(req.body);
             course.id = req.params.id; //make sure the course gets updated
-            res.status();
+            res.status(400)/json({ errors });
           } else {
-            console.log('this is what you want to know', res.params.id);
             throw error;
           }
+    }
+}));
+//DELETE route to remove courses.
+router.delete('/courses/:id', asyncHandler(async(req, res) => {
+    const course = await Course.findByPk(req.params.id);
+    if  (course) {
+        await course.destroy();
+        return res.status(204).location("/").end();
+    } else {
+        res.status(404).json({message:"Course not found."})
     }
 }));
 
