@@ -35,17 +35,15 @@ router.post('/users', asyncHandler(async (req, res) => {
         //that was occuring, which adding 'return' fixed.
         return res.status(201).location("/").end();
     } catch (error) {
-        console.log(error.errors);
-        console.log('ERROR', error.name);
-    }
-    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-        const errors = error.errors.map(err => err.message);
-        res.status(400).json({ errors });   
-      } else {
-        throw error;
-      }
-    }
-));
+        console.log('ERROR: ', error.name);
+        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });   
+        } else {
+            throw error;
+        }
+    }   
+}));
 
 //Route that gets the courses
 router.get('/courses', asyncHandler(async(req, res) => {
@@ -80,14 +78,13 @@ router.post('/courses', asyncHandler(async(req, res) => {
         return res.status(201).location("/courses/" + course.id).end();
     } catch (error) {
         console.log('ERROR', error.name);
-        console.log(error);
+        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });   
+        } else {
+            throw error;
+        }
     }
-    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-        const errors = error.errors.map(err => err.message);
-        res.status(400).json({ errors });   
-      } else {
-        throw error;
-      }
 }));
 
 // PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
@@ -96,8 +93,8 @@ router.put('/courses/:id', asyncHandler(async(req, res) => {
     try {
     const course = await Course.findByPk(req.params.id);
     if (course) {
-        console.log(course.dataValues);
-        console.log(req.body);
+            // console.log(course.dataValues);
+            // console.log(req.body);
         //Note that course here has to be lowercase as it matches the variable set above, not the Model Course
         //Notice also that req.body is already parsed out with the properties to replace those that are already present.
         await course.update(req.body);
@@ -106,12 +103,14 @@ router.put('/courses/:id', asyncHandler(async(req, res) => {
         res.status(404).json({message: "Course not found"})
     }
     } catch (error) {
+        console.log(error.name);
         if (error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError') {
             //the .build method will build a new model instance in case there is a SequelizeValidationError or SequelizeUniqueConstraintError
             //contrast this with the create method, which will build and save the instance.
-            course = await Course.build(req.body);
-            course.id = req.params.id; //make sure the course gets updated
-            res.status(400)/json({ errors });
+            // course = await Course.build(req.body);
+            // course.id = req.params.id; //make sure the course gets updated
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });
           } else {
             throw error;
           }
