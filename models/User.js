@@ -2,7 +2,7 @@
 
 const { Model, DataTypes } = require('sequelize');
 // Leaving bcrypt requirement/import in case we may need it later - see confirmedPassword from latest module to enable.
-// const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 
 module.exports = (sequelize) => {
     class User extends Model {}
@@ -60,10 +60,18 @@ module.exports = (sequelize) => {
               len: {
                 args: [8, 20],
                 msg: 'The password must be between 8 and 20 characters in length',
-              }
+              },
+              //For info on this syntax - see https://sequelize.org/master/manual/getters-setters-virtuals.html#setters
+              //A setter is a function defined for one column in the model (password in this case), it allows bcrypt to hash
+              //the password before it is even sent to the database.
+              set(val) {
+                if ( val === this.password ) {
+                    const hashedPassword = bcrypt.hashSync(val, 10);
+                    this.setDataValue('password', hashedPassword);
+                }
+            },
             }
           },
-          // We may want to include a confirmedPassword property here.
     }, { sequelize });
 
     User.associate = (models) => {

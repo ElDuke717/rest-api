@@ -45,6 +45,39 @@ router.post('/users', asyncHandler(async (req, res) => {
     }   
 }));
 
+//Route that returns a corresponding user.
+router.get("/users/:id", asyncHandler(async (req, res) => {
+    const user = await User.findByPk(req.params.id); //req.params.id contains the users' unique id number
+    if (user) {
+      res.json(user);
+    } else {
+      res.sendStatus(404);
+      console.log('User not found');
+    }
+  }));
+
+// PUT route that will update the corresponding user and return a 204 HTTP status code and no content.
+// This was added later and was based on the course PUT route.
+router.put('/users/:id', asyncHandler(async(req, res) => {
+    try {
+    const user = await User.findByPk(req.params.id);
+    if (user) {
+         await user.update(req.body);
+        return res.status(204).location("/").end();
+    } else {
+        res.status(404).json({message: "User not found."})
+    }
+    } catch (error) {
+        if (error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError') {
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });
+          } else {
+            throw error;
+          }
+    }
+}));
+
+
 //Route that gets the courses
 router.get('/courses', asyncHandler(async(req, res) => {
     let courses = await Course.findAll();
