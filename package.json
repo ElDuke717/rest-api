@@ -12,7 +12,10 @@
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^1.18.3",
-    "sequelize-cli": "^6.3.0"
+    "sequelize-cli": "^6.3.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.22.0"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

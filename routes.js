@@ -64,24 +64,22 @@ router.get("/courses/:id", asyncHandler(async (req, res) => {
     const course = await Course.findByPk(req.params.id); //req.params.id contains the book's unique id number
     if (course) {
       res.json(course);
+      console.log(res.body);
     } else {
       res.sendStatus(404);
       console.log('course not found');
     }
   }));
 
-  //POST route that creates a new course, sets the location header to the URI for the new course and returns
-  //a 201 HTTP status code.
-
+//POST route that creates a new course, sets the location header to the URI for the new course and returns
+//a 201 HTTP status code.
 router.post('/courses', asyncHandler(async(req, res) => {
     try {
         const course = await Course.create(req.body);
         console.log('course was created');
         return res.status(201).location("/courses/" + course.id).end();
     } catch (error) {
-       
         console.log('ERROR', error.name);
-        console.log('ignoramous');
         console.log(error);
     }
     if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
@@ -90,7 +88,34 @@ router.post('/courses', asyncHandler(async(req, res) => {
       } else {
         throw error;
       }
-}))
+}));
+
+// PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
+router.put('/courses/:id', asyncHandler(async(req, res) => {
+    //let course;
+    try {
+    const course = await Course.findByPk(req.params.id);
+    if (course) {
+        console.log(course.dataValues);
+        console.log(req.body);
+        //Note that course here has to be lowercase as it matches the variable set above, not the Model Course
+        //Notice also that req.body is already parsed out with the properties to replace those that are already present.
+        await course.update(req.body);
+        return res.status(204).location("/").end();
+    } else {
+        res.status(404).json({message: "Course not found"})
+    }
+    } catch (error) {
+        if (error.name === "SequelizeValidationError") {
+            course = await Course.build(req.body);
+            course.id = req.params.id; //make sure the course gets updated
+            res.status();
+          } else {
+            console.log('this is what you want to know', res.params.id);
+            throw error;
+          }
+    }
+}));
 
 
 module.exports = router;
