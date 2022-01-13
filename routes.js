@@ -1,6 +1,8 @@
 'use strict'
 
 const express = require('express');
+const { asyncHandler } = require('./middleware/async-handler');
+const { authenticate } = require('./middleware/authenticate');
 require('log-timestamp');
 
 // Construct a router instance:
@@ -8,22 +10,10 @@ const router = express.Router();
 const User = require('./models').User;
 const Course = require('./models').Course;
 
-// Async handler function to wrap around each route.
-function asyncHandler(cb) {
-    return async (req, res, next) => {
-        try {
-            await cb(req, res, next);
-        } catch (error) {
-            // forward to the global error handler
-            next(error);
-        }
-    }
-}
-
 //Route that returns a list of the users.
-router.get('/users', asyncHandler(async (req, res) => {
+router.get('/users', authenticate, asyncHandler(async (req, res) => {
     let users = await User.findAll();
-    res.json(users);
+    res.status(200).json(users);
 }));
 
 //Route that creates new users.
@@ -49,7 +39,7 @@ router.post('/users', asyncHandler(async (req, res) => {
 router.get("/users/:id", asyncHandler(async (req, res) => {
     const user = await User.findByPk(req.params.id); //req.params.id contains the users' unique id number
     if (user) {
-      res.json(user);
+      res.status(200).json(user);
     } else {
       res.sendStatus(404);
       console.log('User not found');
@@ -76,7 +66,6 @@ router.put('/users/:id', asyncHandler(async(req, res) => {
           }
     }
 }));
-
 
 //Route that gets the courses
 router.get('/courses', asyncHandler(async(req, res) => {
