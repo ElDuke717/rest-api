@@ -93,7 +93,7 @@ router.get("/courses/:id", asyncHandler(async (req, res) => {
 
 //POST route that creates a new course, sets the location header to the URI for the new course and returns
 //a 201 HTTP status code.
-router.post('/courses', asyncHandler(async(req, res) => {
+router.post('/courses', authenticate, asyncHandler(async(req, res) => {
     try {
         const course = await Course.create(req.body);
         console.log('course was created');
@@ -110,7 +110,7 @@ router.post('/courses', asyncHandler(async(req, res) => {
 }));
 
 // PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
-router.put('/courses/:id', asyncHandler(async(req, res) => {
+router.put('/courses/:id', authenticate, asyncHandler(async(req, res) => {
     //let course;
     try {
     const course = await Course.findByPk(req.params.id);
@@ -139,7 +139,7 @@ router.put('/courses/:id', asyncHandler(async(req, res) => {
     }
 }));
 //DELETE route to remove courses.
-router.delete('/courses/:id', asyncHandler(async(req, res) => {
+router.delete('/courses/:id', authenticate, asyncHandler(async(req, res) => {
     const course = await Course.findByPk(req.params.id);
     if  (course) {
         await course.destroy();
