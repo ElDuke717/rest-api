@@ -3,6 +3,7 @@
 const express = require('express');
 const { asyncHandler } = require('./middleware/async-handler');
 const { authenticate } = require('./middleware/authenticate');
+const auth = require('basic-auth');
 require('log-timestamp');
 
 // Construct a router instance:
@@ -12,8 +13,22 @@ const Course = require('./models').Course;
 
 //Route that returns a list of the users.
 router.get('/users', authenticate, asyncHandler(async (req, res) => {
-    let users = await User.findAll();
+    try {
+    let users = await User.findAll(
+        { attributes: 
+            { exclude: ['password', 'createdAt', 'updatedAt'] } }
+    );
     res.status(200).json(users);
+    console.log(users);
+    } catch (error) { 
+         console.log('ERROR: ', error.name);
+        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });   
+        } else {
+            throw error;
+        }
+    }
 }));
 
 //Route that creates new users.
@@ -28,8 +43,9 @@ router.post('/users', asyncHandler(async (req, res) => {
         console.log('ERROR: ', error.name);
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
             const errors = error.errors.map(err => err.message);
+            console.log(errors);
             res.status(400).json({ errors });   
-        } else {
+        }  else {
             throw error;
         }
     }   
@@ -67,21 +83,21 @@ router.put('/users/:id', asyncHandler(async(req, res) => {
     }
 }));
 
-//Route that gets the courses
-router.get('/courses', asyncHandler(async(req, res) => {
-    let courses = await Course.findAll();
-    res.json(courses);
-}))
-
 //Route that returns a list of the courses.
 router.get('/courses', asyncHandler(async (req, res) => {
-    let courses = await Course.findAll();
+    let courses = await Course.findAll(
+        { attributes: 
+            { exclude: ['password', 'createdAt', 'updatedAt'] } }
+    );
     res.json(courses);
 }));
 
 //Route that returns a corresponding course including the user.
 router.get("/courses/:id", asyncHandler(async (req, res) => {
-    const course = await Course.findByPk(req.params.id); //req.params.id contains the book's unique id number
+    const course = await Course.findByPk(req.params.id,
+        { attributes: 
+            { exclude: ['password', 'createdAt', 'updatedAt'] } }
+        ); //req.params.id contains the book's unique id number
     if (course) {
       res.json(course);
       console.log(res.body);
@@ -110,17 +126,43 @@ router.post('/courses', authenticate, asyncHandler(async(req, res) => {
 }));
 
 // PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
+// In order to get authentication to work for PUT and DELETE, we need to match the userId of the course to the user
+// primary key of the user.  We need to make sure that when a course is created, the user's primary key/ id  is used to 
+// populate the userId field for the course.dataValues
+
+// Once we're able to automatically populate the userId for the course, we can check the id of the user attempting to 
+// PUT or DELETE a route by comparing the course userId with the primary key of the user, then use this logic to allow
+// the process to move forward or respond with a 403 forbidden error.
+
 router.put('/courses/:id', authenticate, asyncHandler(async(req, res) => {
-    //let course;
+    let course;
     try {
-    const course = await Course.findByPk(req.params.id);
+    course = await Course.findByPk(req.params.id);
+    const username = auth(req).name;
+    console.log('Username: ', username);
+    // Find the user in the Users table based on their username/email address.   
+    const userDetails = await User.findOne({ where: {emailAddress: username} })
+    // Return the user's primary key/id from userDetails
+    const userPk = userDetails.dataValues.id
+    console.log("Here's the user: ", userPk);
+    // course.dataValues.userId will give the existing userId for the course.
+    // We need to get the userId from the authorization header to compare with the course.dataValues.userId
+    // In order to get the userId for the authenticated user, it has to be pulled from User's database
+    // courseAuthor returns the userId for the course. 
+    const courseAuthor = course.dataValues.userId
+    console.log('Here\'s the courseAuthor: ', courseAuthor);
+    // req passed into auth parses out the username and the password from the authorization header on the request.
     if (course) {
-            // console.log(course.dataValues);
-            // console.log(req.body);
-        //Note that course here has to be lowercase as it matches the variable set above, not the Model Course
-        //Notice also that req.body is already parsed out with the properties to replace those that are already present.
-        await course.update(req.body);
-        return res.status(204).location("/").end();
+        // if the primary key of the authenticated user matches the course's author, then the PUT request will proceed.
+        if (userPk === courseAuthor) {
+            //Note that course here has to be lowercase as it matches the variable set above, not the Model Course
+            //Notice also that req.body is already parsed out with the properties to replace those that are already present.
+            await course.update(req.body);
+            return res.status(204).location("/").end();
+        } else {
+            // if the authenticated user and the course author don't match, then a 403 status is returned with a message.
+            res.status(403).json({message: "unauthorized user"});
+        }
     } else {
         res.status(404).json({message: "Course not found"})
     }
@@ -138,12 +180,30 @@ router.put('/courses/:id', authenticate, asyncHandler(async(req, res) => {
           }
     }
 }));
-//DELETE route to remove courses.
+
+//DELETE route to remove courses.  The autthentication pattern here matches the one used for the PUT route above.
 router.delete('/courses/:id', authenticate, asyncHandler(async(req, res) => {
+    // Find the course based on its id number
     const course = await Course.findByPk(req.params.id);
+    // get the username from entered credentials.
+    const username = auth(req).name;
+    console.log('Username: ', username);
+    // find the user's details from the Users table by comparing the username against the emails in the table
+    const userDetails = await User.findOne({ where: {emailAddress: username} });
+    // pull the user's unique identifying or primary key from the table and assign to userPk
+    const userPk = userDetails.dataValues.id
+    console.log("Here's the user: ", userPk);
+    // Pull the course's userId from the course data and assign to courseAuthor
+    const courseAuthor = course.dataValues.userId
+    console.log('Here\'s the courseAuthor: ', courseAuthor);
     if  (course) {
+        // if the userPk from the authenticated user matches the courseAuthor, then proceed.
+        if (userPk === courseAuthor) {
         await course.destroy();
         return res.status(204).location("/").end();
+        } else {
+        res.status(403).json({message: "unauthorized user"});
+        }
     } else {
         res.status(404).json({message:"Course not found."})
     }

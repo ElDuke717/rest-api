@@ -55,7 +55,9 @@ module.exports = (sequelize) => {
                 }
             }
         },
-        // userId: I'm not sure how to structure this - the instructions and course work are not clear how to do this.
+        // Need to make the userId populate based on the foreignKey which should be the same as the primary key or id of the user
+        // that creates the course
+        // userId: 
         // reference here one-to-many relationships https://sequelize.org/master/manual/assocs.html#one-to-many-relationships
         //userId: {},
 

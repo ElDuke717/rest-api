@@ -3,16 +3,21 @@
 const auth = require('basic-auth');
 const bcrypt = require('bcrypt');
 const { User } = require('../models');
-//const { Course } = require('../models');
 
+// exports.authenticate allows the authenticate function to be exported to other modules
 exports.authenticate = async (req, res, next) => {
-    let message;
+    let message; // initiate message to display
+    // Auth parses the user's credentials from the Authorization header - Credentials name and password
     const credentials = auth(req);
     console.log(credentials);
+    // If there are credentials, retreive the user from the datastore by their username - in this case email 
+    // pulled by auth from the authorization header.
     if (credentials) {
-        const user = await User.findOne({ where: {username: credentials.email} });
+        // const user is the instance in the database that has an email address that matches the credentials.name
+        const user = await User.findOne({ where: {emailAddress: credentials.name} });
+        // if a user instance that matches the credentials is found, then the password is authenticated.
         if (user) {
-            const authenicated = bcrypt
+            const authenticated = bcrypt
                 .compareSync(credentials.pass, user.password);
                 if (authenticated) {
                     console.log(`Authentication successful for username: ${user.username}`);

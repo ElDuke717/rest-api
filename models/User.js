@@ -34,6 +34,7 @@ module.exports = (sequelize) => {
           emailAddress: {
             type: DataTypes.STRING,
             allowNull: false,
+            // Unique will cause a SequelizeUniqueConstraintError to be thrown - all other constraints will cause a SequelizeValidationError
             unique: {
               msg: 'The email you entered already exists',
             },

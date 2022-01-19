@@ -304,7 +304,7 @@
 					"raw": "{\n\t\"id\": 3,\n    \"title\": \"New Course Updated Again Hello\",\n    \"description\": \"My course description. And again.\",\n    \"userId\": 1\n}"
 				},
 				"url": {
-					"raw": "localhost:5000/api/courses/3",
+					"raw": "localhost:5000/api/courses/5",
 					"host": [
 						"localhost"
 					],
@@ -312,7 +312,7 @@
 					"path": [
 						"api",
 						"courses",
-						"3"
+						"5"
 					]
 				}
 			},
@@ -344,7 +344,7 @@
 					}
 				],
 				"url": {
-					"raw": "localhost:5000/api/courses/3",
+					"raw": "localhost:5000/api/courses/16",
 					"host": [
 						"localhost"
 					],
@@ -352,7 +352,7 @@
 					"path": [
 						"api",
 						"courses",
-						"3"
+						"16"
 					]
 				}
 			},
