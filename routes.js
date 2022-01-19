@@ -52,7 +52,7 @@ router.post('/users', asyncHandler(async (req, res) => {
 }));
 
 //Route that returns a specific user.
-router.get("/users/:id", asyncHandler(async (req, res) => {
+router.get("/users/:id", authenticate, asyncHandler(async (req, res) => {
     const user = await User.findByPk(req.params.id); //req.params.id contains the users' unique id number
     if (user) {
       res.status(200).json(user);
