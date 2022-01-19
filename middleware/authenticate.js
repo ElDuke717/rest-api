@@ -17,6 +17,8 @@ exports.authenticate = async (req, res, next) => {
         const user = await User.findOne({ where: {emailAddress: credentials.name} });
         // if a user instance that matches the credentials is found, then the password is authenticated.
         if (user) {
+            // The compareSync method is used to compare the hashed password from the credentials.name with
+            // the password that has already been hashed. 
             const authenticated = bcrypt
                 .compareSync(credentials.pass, user.password);
                 if (authenticated) {

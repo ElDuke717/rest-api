@@ -4,6 +4,7 @@ const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('.');
 const User = require('./User');
 
+// The model for the courses table - belongsTo or associated with one user.
 module.exports = (sequelize) => {
     class Course extends Model {}
     Course.init({
@@ -55,11 +56,14 @@ module.exports = (sequelize) => {
                 }
             }
         },
-        // Need to make the userId populate based on the foreignKey which should be the same as the primary key or id of the user
+        // May need to make the userId populate based on the foreignKey which should be the same as the primary key or id of the user
         // that creates the course
-        // userId: 
+        // userId - defined in the associations, need to determine if this is a field that should come from the User.
         // reference here one-to-many relationships https://sequelize.org/master/manual/assocs.html#one-to-many-relationships
-        //userId: {},
+        // userId: {
+        //     type: DataTypes.INTEGER,
+        //     allowNull: false,
+        // },
 
     }, { sequelize });
     Course.associate = (models) => {
@@ -75,4 +79,3 @@ module.exports = (sequelize) => {
     return Course;
 }
 
-//console.log(Course === sequelize.models.Course);

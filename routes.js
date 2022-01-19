@@ -51,7 +51,7 @@ router.post('/users', asyncHandler(async (req, res) => {
     }   
 }));
 
-//Route that returns a corresponding user.
+//Route that returns a specific user.
 router.get("/users/:id", asyncHandler(async (req, res) => {
     const user = await User.findByPk(req.params.id); //req.params.id contains the users' unique id number
     if (user) {
@@ -64,7 +64,7 @@ router.get("/users/:id", asyncHandler(async (req, res) => {
 
 // PUT route that will update the corresponding user and return a 204 HTTP status code and no content.
 // This was added later and was based on the course PUT route.
-router.put('/users/:id', asyncHandler(async(req, res) => {
+router.put('/users/:id', authenticate, asyncHandler(async(req, res) => {
     try {
     const user = await User.findByPk(req.params.id);
     if (user) {
@@ -92,7 +92,7 @@ router.get('/courses', asyncHandler(async (req, res) => {
     res.json(courses);
 }));
 
-//Route that returns a corresponding course including the user.
+//Route that returns a specifc course including the user.
 router.get("/courses/:id", asyncHandler(async (req, res) => {
     const course = await Course.findByPk(req.params.id,
         { attributes: 
@@ -126,13 +126,13 @@ router.post('/courses', authenticate, asyncHandler(async(req, res) => {
 }));
 
 // PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
-// In order to get authentication to work for PUT and DELETE, we need to match the userId of the course to the user
-// primary key of the user.  We need to make sure that when a course is created, the user's primary key/ id  is used to 
-// populate the userId field for the course.dataValues
+    // In order to get authentication to work for PUT and DELETE, we need to match the userId of the course to the user
+    // primary key of the user.  We need to make sure that when a course is created, the user's primary key/ id  is used to 
+    // populate the userId field for the course.dataValues
 
-// Once we're able to automatically populate the userId for the course, we can check the id of the user attempting to 
-// PUT or DELETE a route by comparing the course userId with the primary key of the user, then use this logic to allow
-// the process to move forward or respond with a 403 forbidden error.
+    // Once we're able to automatically populate the userId for the course, we can check the id of the user attempting to 
+    // PUT or DELETE a route by comparing the course userId with the primary key of the user, then use this logic to allow
+    // the process to move forward or respond with a 403 forbidden error.
 
 router.put('/courses/:id', authenticate, asyncHandler(async(req, res) => {
     let course;
