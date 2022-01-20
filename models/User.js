@@ -1,7 +1,7 @@
 'use strict';
 
 const { Model, DataTypes } = require('sequelize');
-// Leaving bcrypt requirement/import in case we may need it later - see confirmedPassword from latest module to enable.
+//  bcrypt requirement/import is used to hash the password that is submitted.  It is also used to decrypt the password in the authentication process in authenticate.
 const bcrypt = require('bcrypt');
 
 module.exports = (sequelize) => {
@@ -70,7 +70,7 @@ module.exports = (sequelize) => {
                     const hashedPassword = bcrypt.hashSync(val, 10);
                     this.setDataValue('password', hashedPassword);
                 }
-            },
+              },
             }
           },
     }, { sequelize });

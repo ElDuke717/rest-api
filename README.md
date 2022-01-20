@@ -1,7 +1,7 @@
-# rest-api
-## Running on localhost port 5000
-## This is project 9 for Treehouse FullStack JavaScript Curriculum.
-## Project is being submitted for Exceeds Expectations. See the *Notes* section for specific details.
+# rest-api project
+
+## This is project 9 for the Treehouse FullStack JavaScript Curriculum.
+## It is being submitted for Exceeds Expectations. See the *Notes* section for specific details.
 
 ### It is a REST API using the NodeJS framework Express.  
 
@@ -25,9 +25,9 @@ To make changes to the database, users will be required to log in so the API wil
     - `GET` a specific user
     - `POST` a new course (note, this needs the inclusion of a `userId` in the request). 
     - `PUT` update an existing course.
-    - `DELETE` a specific course.
+    - `DELETE` a specific existing course.
 
-- **bcrypt.js** is used to hash the passwords.
+- **bcrypt.js** is used to hash the passwords put into the database and to decrypt passwords in user authentication using compareSync.
 - All routes have been tested in **Postman** using the file `RESTAPI.postman_collection.json`
 
 ## Criteria for Excceds:

@@ -32,42 +32,20 @@ module.exports = (sequelize) => {
                 }
             }
         },
+        //  Minimum data required are just title and description - null values are allowed for estimatedTime and materialsNeeded.
         estimatedTime: {
             type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notNull: {
-                    msg: 'Please add an estimated time duration for the course',
-                },
-                notEmpty: {
-                    msg: 'Please add an estimated time duration for the course',
-                }
-            }
         },
         materialsNeeded: {
             type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notNull: {
-                    msg: 'Please list the materials needed for the course',
-                },
-                notEmpty: {
-                    msg: 'Please list the materials needed for the course',
-                }
-            }
         },
-        // May need to make the userId populate based on the foreignKey which should be the same as the primary key or id of the user
-        // that creates the course
-        // userId - defined in the associations, need to determine if this is a field that should come from the User.
+        
+        // userId - defined in the associations and is not included as part of the model's fields
         // reference here one-to-many relationships https://sequelize.org/master/manual/assocs.html#one-to-many-relationships
-        // userId: {
-        //     type: DataTypes.INTEGER,
-        //     allowNull: false,
-        // },
-
     }, { sequelize });
     Course.associate = (models) => {
         Course.belongsTo(models.User, {
+            // Note that these parameters are used in the routes to cross-reference this model's association
             as: 'user',
             foreignKey: {
                 fieldName: 'userId',
