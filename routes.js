@@ -11,12 +11,15 @@ const router = express.Router();
 const User = require('./models').User;
 const Course = require('./models').Course;
 
-//Route that returns a list of the users.
+//Route that returns the authenticated user's details.
 router.get('/users', authenticate, asyncHandler(async (req, res) => {
     try {
-    let users = await User.findAll(
-        { attributes: 
-            { exclude: ['password', 'createdAt', 'updatedAt'] } }
+        const username = auth(req).name;
+        console.log('Username: ', username);
+        let users = await User.findOne(
+        { where: {emailAddress: username}, 
+        attributes: 
+            { exclude: ['password', 'createdAt', 'updatedAt']  } }
     );
     res.status(200).json(users);
     console.log(users);
@@ -86,18 +89,47 @@ router.put('/users/:id', authenticate, asyncHandler(async(req, res) => {
 //Route that returns a list of the courses.
 router.get('/courses', asyncHandler(async (req, res) => {
     let courses = await Course.findAll(
-        { attributes: 
-            { exclude: ['password', 'createdAt', 'updatedAt'] } }
+        {   
+            // Attributes to exclude for the courses model
+            attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }, 
+            // Include user information from User model for each course
+            include: [
+                // nested parameters specified for the associated model's data
+                {
+                    // specify the associated model
+                    model: User, 
+                    // the associated model's alias
+                    as: 'user',
+                    // attributes to exclude from the associated model.
+                    attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+                }
+            ],
+        }
     );
     res.json(courses);
 }));
 
 //Route that returns a specifc course including the user.
 router.get("/courses/:id", asyncHandler(async (req, res) => {
+    //
     const course = await Course.findByPk(req.params.id,
-        { attributes: 
-            { exclude: ['password', 'createdAt', 'updatedAt'] } }
-        ); //req.params.id contains the book's unique id number
+        {   
+            // Attributes to exclude for the courses model
+            attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }, 
+            // Include user information from User model for each course
+            include: [
+                // nested parameters specified for the associated model's data
+                {
+                    // specify the associated model
+                    model: User, 
+                    // the associated model's alias
+                    as: 'user',
+                    // attributes to exclude from the associated model.
+                    attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+                }
+            ],
+        }
+        ); 
     if (course) {
       res.json(course);
       console.log(res.body);
@@ -171,8 +203,6 @@ router.put('/courses/:id', authenticate, asyncHandler(async(req, res) => {
         if (error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError') {
             //the .build method will build a new model instance in case there is a SequelizeValidationError or SequelizeUniqueConstraintError
             //contrast this with the create method, which will build and save the instance.
-            // course = await Course.build(req.body);
-            // course.id = req.params.id; //make sure the course gets updated
             const errors = error.errors.map(err => err.message);
             res.status(400).json({ errors });
           } else {
