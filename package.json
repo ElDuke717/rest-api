@@ -4,18 +4,18 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon ./app.js",
-    "seed": "cross-env DB_ENABLE_LOGGING=true node './seed'"
-  },
+    "start": "node app.js",
+    "build": "sequelize db:migrate"
+  },  
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^1.18.3",
-    "sequelize-cli": "^6.3.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.2.0",
-    "eslint-plugin-import": "^2.22.0"
+    "eslint-plugin-import": "^2.22.0",
+    "nodemon": "^1.18.3",
+    "sequelize-cli": "^6.3.0"
   },
   "dependencies": {
     "basic-auth": "^2.0.1",
@@ -24,8 +24,10 @@
     "express": "^4.17.1",
     "log-timestamp": "^0.3.0",
     "morgan": "^1.10.0",
+    "pg": "^8.7.3",
     "promise.prototype.finally": "^3.1.2",
     "sequelize": "^6.12.5",
+    "sequelize-auto-migrations-v2": "^1.2.1",
     "sqlite3": "^5.0.0"
   }
 }
