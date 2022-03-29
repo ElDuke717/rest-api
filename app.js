@@ -3,6 +3,7 @@
 const Sequelize = require('sequelize');
 const routes = require('./routes');
 require('log-timestamp');
+const cors = require('cors');
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
@@ -28,6 +29,9 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 
 // create the Express app
 const app = express();
+
+//enable all CORS requests
+app.use(cors());
 
 //Gives express the ability to parse JSON and read req.body
 app.use(express.json());
